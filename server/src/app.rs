@@ -7,7 +7,7 @@ use axum::http::StatusCode;
 #[derive(Template)]
 #[template(path = "welcome.html")]
 struct WelcomeTmpl {
-    _name: String
+    name: String
 }
 
 struct HtmlTemplate<T>(T);
@@ -33,7 +33,7 @@ pub fn get_app() -> Router {
 }
 
 async fn welcome() -> impl IntoResponse {
-    let tmpl = WelcomeTmpl { _name: "hey there".to_string() };
+    let tmpl = WelcomeTmpl { name: "hey there".to_string() };
     HtmlTemplate(tmpl)
 }
 
