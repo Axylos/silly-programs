@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 
 [workspace]
-members = [ "silly-echo" ]
+members = [ "silly-echo", "server" ]
