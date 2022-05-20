@@ -15,7 +15,6 @@ fn main() {
     let first = &*args[1];
 
     if first != "69" && first.parse::<f64>().is_ok() {
-        println!("first arg: {}", first);
         println!("I don't wanna.");
         exit(1);
     }

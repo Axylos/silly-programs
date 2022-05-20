@@ -1,8 +1,4 @@
 use std::net::SocketAddr;
-use axum::{
-    routing::get,
-    Router
-};
 
 use server::foo;
 
