@@ -1,17 +1,7 @@
 use std::net::{SocketAddr, TcpListener};
-use axum::{
-    routing::get,
-    Router
-};
-use tokio::task::JoinHandle;
-use tower;
-
-
-use tower_http::services::ServeDir;
-use server::foo;
 
 async fn bind_server() {
-    let listener = TcpListener::bind("0.0.0.0:8080".parse::<SocketAddr>().unwrap()).unwrap();
+    let listener = TcpListener::bind("0.0.0.0:8081".parse::<SocketAddr>().unwrap()).unwrap();
     let addr = listener.local_addr().unwrap();
 
     tracing::debug!("listening on {}", addr);

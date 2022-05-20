@@ -4,11 +4,12 @@ use axum::{Json, Router};
 use axum::routing::{get, get_service};
 use askama::Template;
 use axum::http::StatusCode;
+use tower_http::services::ServeDir;
 
 #[derive(Template)]
 #[template(path = "welcome.html")]
 struct WelcomeTmpl {
-   _name: String
+   name: String
 }
 
 struct HtmlTemplate<T>(T);
@@ -26,35 +27,24 @@ where T: Template, {
         }
     }
 pub fn get_app() -> Router {
-    println!("current path: {:?}", std::env::current_dir());
-    let serve_dir = tower_http::services::ServeDir::new("static/");
-    let serve_file = tower_http::services::ServeFile::new("./static/style.css");
     let app = Router::new()
+        .nest("/assets/",
+            get_service(ServeDir::new("assets"))
+            .handle_error(handle_error))
         .route("/ping", get(ping))
         .route("/silly/*poing", get(ping))
-        .route("/welcome", get(welcome))
-        .route("/foo/*key", get_service(serve_file)
-            .handle_error(|error: io::Error| async move {
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Unhandled internal error: {}", error)
-                )
-            }))
-        .route("/static/*key", get_service(serve_dir)
-            .handle_error(|error: io::Error| async move {
-                eprintln!("can't find route");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Unhandled internal error: {}", error)
-                    )
-            }));
-
+        .route("/welcome", get(welcome));
 
     app
 }
 
+async fn handle_error(_err: io::Error) -> impl IntoResponse {
+    println!("got an issue");
+    (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong...")
+}
+
 async fn welcome() -> impl IntoResponse {
-    let tmpl = WelcomeTmpl { _name: "hey there".to_string() };
+    let tmpl = WelcomeTmpl { name: "hey there".to_string() };
     HtmlTemplate(tmpl)
 }
 
@@ -118,12 +108,11 @@ mod tests {
         let app = get_app();
 
         let resp = app
-            .oneshot(Request::builder().uri("/foo/bar").body(Body::empty()).unwrap())
+            .oneshot(Request::builder().uri("/assets/style.css").body(Body::empty()).unwrap())
             .await
             .unwrap();
 
 
-        println!("{:?}", resp);
         assert_eq!(StatusCode::OK, resp.status());
 
     }
@@ -143,8 +132,7 @@ mod tests {
 
         let client = hyper::Client::new();
 
-        let url = format!("http://{}/foo/barz", addr);
-        println!("{}", url);
+        let url = format!("http://{}/assets/style.css", addr);
         let response = client
             .request(
                 Request::builder()
