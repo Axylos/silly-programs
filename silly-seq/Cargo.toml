@@ -1,17 +1,10 @@
 [package]
-name = "silly"
+name = "silly-seq"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-
-[workspace]
-members = [ 
-  "silly-echo",
-  "server",
-  "loki-test",
-  "silly-tee",
-  "silly-seq"
- ]
+[dev-dependencies]
+assert_cmd = "2.0.4"
+predicates = "2.1.1"

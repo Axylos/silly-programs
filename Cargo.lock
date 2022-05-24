@@ -1525,6 +1525,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "silly-seq"
+version = "0.1.0"
+dependencies = [
+ "assert_cmd",
+ "predicates",
+]
+
+[[package]]
 name = "silly-tee"
 version = "0.1.0"
 dependencies = [
