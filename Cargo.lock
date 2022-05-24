@@ -1527,6 +1527,10 @@ dependencies = [
 [[package]]
 name = "silly-tee"
 version = "0.1.0"
+dependencies = [
+ "assert_cmd",
+ "predicates",
+]
 
 [[package]]
 name = "siphasher"
