@@ -1,19 +1,56 @@
+use std::io;
+use std::process::exit;
 
-use std::{
-    fs::File,
-    io::{Read},
-    os::unix::io::FromRawFd
-};
+enum Ret {
+    Incorrect,
+    Correct,
+    Answer,
+}
 
 fn main() {
-    println!("got here");
-    let mut f = unsafe { File::from_raw_fd(0) };
-    println!("and here");
-    let mut input = String::new();
-    let result = f.read_to_string(&mut input);
-    println!("not here");
-    println!("{:?}", result);
+    let mut buf = String::new();
 
-    println!("read: {} -- {} {:?}", input, input.len(), result);
-    println!("hey there {:?}", input.len());
+    let mut ret: Ret = Ret::Incorrect;
+    loop {
+        let size = io::stdin().read_line(&mut buf);
+        match size {
+            Ok(0) => {
+                break;
+            }
+            Ok(1) => {}
+            Ok(3) => {
+                ret = Ret::Answer;
+                println!("\n");
+            }
+            Ok(_) => {
+                ret = Ret::Correct;
+                eprintln!("{}", buf);
+                let bs = vec![buf.trim().as_bytes()];
+                for byte_list in bs {
+                    for byte in byte_list {
+                        print!("{} ", byte);
+                    }
+                    print!("\n");
+                }
+            }
+
+            Err(_) => {
+                exit(27);
+            }
+        }
+        buf.clear();
+    }
+
+    match ret {
+        Ret::Correct => exit(0),
+        Ret::Incorrect => {
+            println!("whoopsie");
+            exit(7);
+        }
+        Ret::Answer => {
+            eprintln!("You've found the magic answer");
+            println!("FoLl0w 743 w4173 ra8817 n008");
+            exit(42)
+        }
+    }
 }
