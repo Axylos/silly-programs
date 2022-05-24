@@ -1,36 +1,40 @@
-use std::io;
-use axum::response::{IntoResponse, Response, Html};
-use axum::{Json, Router};
-use axum::routing::{get, get_service};
 use askama::Template;
 use axum::http::StatusCode;
+use axum::response::{Html, IntoResponse, Response};
+use axum::routing::{get, get_service};
+use axum::{Json, Router};
+use std::io;
 use tower_http::services::ServeDir;
 
 #[derive(Template)]
 #[template(path = "welcome.html")]
 struct WelcomeTmpl {
-   name: String
+    name: String,
 }
 
 struct HtmlTemplate<T>(T);
 
-impl <T> IntoResponse for HtmlTemplate<T>
-where T: Template, {
+impl<T> IntoResponse for HtmlTemplate<T>
+where
+    T: Template,
+{
     fn into_response(self) -> Response {
         match self.0.render() {
             Ok(html) => Html(html).into_response(),
             Err(err) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Failed to render template {}", err))
-                    .into_response(),
-            }
+                format!("Failed to render template {}", err),
+            )
+                .into_response(),
         }
     }
+}
 pub fn get_app() -> Router {
     let app = Router::new()
-        .nest("/assets/",
-            get_service(ServeDir::new("assets"))
-            .handle_error(handle_error))
+        .nest(
+            "/assets/",
+            get_service(ServeDir::new("assets")).handle_error(handle_error),
+        )
         .route("/ping", get(ping))
         .route("/silly/*poing", get(ping))
         .route("/welcome", get(welcome));
@@ -44,24 +48,26 @@ async fn handle_error(_err: io::Error) -> impl IntoResponse {
 }
 
 async fn welcome() -> impl IntoResponse {
-    let tmpl = WelcomeTmpl { name: "hey there".to_string() };
+    let tmpl = WelcomeTmpl {
+        name: "hey there".to_string(),
+    };
     HtmlTemplate(tmpl)
 }
 
 async fn ping() -> impl IntoResponse {
-   Json("pong")
+    Json("pong")
 }
 
 #[cfg(test)]
 mod tests {
-    use std::net::{SocketAddr, TcpListener};
-    use tower::ServiceExt;
-    use scraper::{Html, Selector};
+    use super::*;
     use axum::{
         body::Body,
-        http::{Request, StatusCode, header}
+        http::{header, Request, StatusCode},
     };
-    use super::*;
+    use scraper::{Html, Selector};
+    use std::net::{SocketAddr, TcpListener};
+    use tower::ServiceExt;
     #[tokio::test]
     async fn it_pings() {
         let app = get_app();
@@ -70,7 +76,6 @@ mod tests {
             .oneshot(Request::builder().uri("/ping").body(Body::empty()).unwrap())
             .await
             .unwrap();
-
 
         let (parts, body) = resp.into_parts();
         let body = hyper::body::to_bytes(body).await.unwrap();
@@ -88,16 +93,19 @@ mod tests {
         let app = get_app();
 
         let resp = app
-            .oneshot(Request::builder().uri("/welcome").body(Body::empty()).unwrap())
+            .oneshot(
+                Request::builder()
+                    .uri("/welcome")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
             .await
             .unwrap();
-
 
         let (_parts, raw_body) = resp.into_parts();
         let body = hyper::body::to_bytes(raw_body).await.unwrap();
         let html = String::from_utf8(body.to_vec()).unwrap();
-        let selector = Selector::parse("h1")
-            .unwrap();
+        let selector = Selector::parse("h1").unwrap();
         let doc = Html::parse_document(&html);
         let el = doc.select(&selector).next().unwrap();
         assert_eq!("Welcome!", el.text().next().unwrap())
@@ -108,13 +116,16 @@ mod tests {
         let app = get_app();
 
         let resp = app
-            .oneshot(Request::builder().uri("/assets/style.css").body(Body::empty()).unwrap())
+            .oneshot(
+                Request::builder()
+                    .uri("/assets/style.css")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
             .await
             .unwrap();
 
-
         assert_eq!(StatusCode::OK, resp.status());
-
     }
     // You can also spawn a server and talk to it like any other HTTP server:
     #[tokio::test]
@@ -134,16 +145,10 @@ mod tests {
 
         let url = format!("http://{}/assets/style.css", addr);
         let response = client
-            .request(
-                Request::builder()
-                    .uri(url)
-                    .body(Body::empty())
-                    .unwrap(),
-            )
+            .request(Request::builder().uri(url).body(Body::empty()).unwrap())
             .await
             .unwrap();
 
         assert_eq!(StatusCode::OK, response.status());
     }
-
 }

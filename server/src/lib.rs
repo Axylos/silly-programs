@@ -1,5 +1,7 @@
 pub mod app;
 
 pub mod foo {
-    pub fn bar() { println!("bar") }
+    pub fn bar() {
+        println!("bar")
+    }
 }

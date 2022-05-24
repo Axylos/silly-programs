@@ -2,7 +2,6 @@ use std::env;
 use std::process::exit;
 
 fn main() {
-
     let response = "no";
     let args: Vec<String> = env::args().collect();
 
@@ -26,12 +25,12 @@ fn main() {
             } else {
                 println!("{} -- nice", args[2]);
             }
-                exit(66)
-        },
+            exit(66)
+        }
         "no" => {
             println!("yes");
             exit(1);
-        },
+        }
         _ => {
             println!("{}", response);
             exit(0)

@@ -7,18 +7,16 @@ async fn bind_server() {
     tracing::debug!("listening on {}", addr);
     let app = server::app::get_app();
 
-        axum::Server::from_tcp(listener)
-            .unwrap()
-            .serve(app.into_make_service())
-            .await
-            .unwrap()
+    axum::Server::from_tcp(listener)
+        .unwrap()
+        .serve(app.into_make_service())
+        .await
+        .unwrap()
 }
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
 
-
     println!("called");
     bind_server().await;
 }
-
